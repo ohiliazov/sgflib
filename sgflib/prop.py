@@ -21,6 +21,9 @@ class SGFProp:
     def __eq__(self, other: "SGFProp"):
         return self.label == other.label and self.values == other.values
 
+    def __lt__(self, other: "SGFProp"):
+        return self.label < other.label
+
     def add(self, value: str):
         if value in self.values:
             raise DuplicateSGFPropValueError(value)

@@ -34,9 +34,9 @@ class SGFNodeError(Exception):
     pass
 
 
-class SGFNodeDuplicatePropError(SGFNodeError):
+class DuplicateSGFPropError(SGFNodeError):
     pass
 
 
-class SGFNodePropNotFoundError(SGFNodeError):
+class SGFPropNotFoundError(SGFNodeError):
     pass

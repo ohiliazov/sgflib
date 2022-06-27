@@ -26,13 +26,13 @@ class SGFTree:
             s += "\n" + " " * offset + tree.pretty(offset+indent, indent)
         return s + "\n" + " " * offset + ")"
 
-    def pretty_repr(self, offset: int = 0, indent: int = 4):
+    def repr(self, offset: int = 0, indent: int = 4):
         s = " " * offset + repr(self)
         for node in self.nodes:
-            s += "\n" + node.pretty_repr(offset + indent, indent)
+            s += "\n" + node.repr(offset + indent, indent)
 
         for variation in self.variations:
-            s += "\n" + variation.pretty_repr(offset + indent, indent)
+            s += "\n" + variation.repr(offset + indent, indent)
         return s
 
     def insert(self, tree: "SGFTree", index: int = 0):

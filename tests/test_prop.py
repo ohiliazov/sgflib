@@ -14,24 +14,10 @@ from sgflib.exceptions import DuplicateSGFPropValueError, EmptySGFPropValueError
         ("C", ["John Doe [3d] \\UA\\"], "C[John Doe [3d\\] \\\\UA\\\\]"),
     ]
 )
-def test_prop_str(label, values, expected):
+def test_print_prop(label, values, expected):
     prop = SGFProp(label, values)
     assert str(prop) == expected
-
-
-@pytest.mark.parametrize(
-    "label, values, expected",
-    [
-        ("B", ["dd"], "SGFProp(B[dd])"),
-        ("B", {"dd"}, "SGFProp(B[dd])"),
-        ("AB", ["dd", "pp"], "SGFProp(AB[dd][pp])"),
-        ("AB", ["pp", "dd"], "SGFProp(AB[dd][pp])"),
-        ("C", ["John Doe [3d] \\UA\\"], "SGFProp(C[John Doe [3d\\] \\\\UA\\\\])"),
-    ]
-)
-def test_prop_repr(label, values, expected):
-    prop = SGFProp(label, values)
-    assert repr(prop) == expected
+    assert repr(prop) == f"SGFProp({expected})"
 
 
 def test_prop_add_value():
