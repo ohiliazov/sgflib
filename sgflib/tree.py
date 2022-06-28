@@ -1,10 +1,14 @@
 from typing import List
 
 from .node import SGFNode
+from .exceptions import EmptySGFTreeError, SGFTreeInsertionError
 
 
 class SGFTree:
     def __init__(self, nodes: List[SGFNode], variations: List["SGFTree"] = None):
+        if not nodes:
+            raise EmptySGFTreeError("Expected at least one SGFNode in nodes.")
+
         self.nodes = nodes
         self.variations = variations or []
 
@@ -26,7 +30,7 @@ class SGFTree:
             s += "\n" + " " * offset + tree.pretty(offset+indent, indent)
         return s + "\n" + " " * offset + ")"
 
-    def repr(self, offset: int = 0, indent: int = 4):
+    def repr(self, offset: int = 0, indent: int = 2):
         s = " " * offset + repr(self)
         for node in self.nodes:
             s += "\n" + node.repr(offset + indent, indent)
@@ -35,13 +39,16 @@ class SGFTree:
             s += "\n" + variation.repr(offset + indent, indent)
         return s
 
-    def insert(self, tree: "SGFTree", index: int = 0):
-        if index < len(self.nodes) - 1:
-            main_tree = SGFTree(self.nodes[index:], self.variations)
+    def insert(self, tree: "SGFTree", index: int):
+        if index < 1:
+            raise SGFTreeInsertionError("Cannot insert SGFTree to the beginning")
+        if index < len(self.nodes):
+            self.variations = [SGFTree(self.nodes[index:], self.variations), tree]
             self.nodes = self.nodes[:index]
-            self.variations = [main_tree, tree]
         elif self.variations:
             self.variations.append(tree)
-        else:
+        elif index == len(self.nodes):
             self.nodes.extend(tree.nodes)
             self.variations = tree.variations
+        else:
+            raise SGFTreeInsertionError("Index out of bounds of SGFTree.")

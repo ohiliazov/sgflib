@@ -22,9 +22,6 @@ def test_print_node(props, expected):
     node = SGFNode(props)
     assert str(node) == expected
     assert repr(node) == f"SGFNode({expected})"
-    assert node.repr() == f"SGFNode({expected})" + "".join(
-        "\n  " + repr(prop) for prop in node.props
-    )
 
 
 def test_node_ops():

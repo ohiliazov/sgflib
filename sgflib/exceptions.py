@@ -40,3 +40,15 @@ class DuplicateSGFPropError(SGFNodeError):
 
 class SGFPropNotFoundError(SGFNodeError):
     pass
+
+
+class SGFTreeError(Exception):
+    pass
+
+
+class EmptySGFTreeError(SGFTreeError):
+    pass
+
+
+class SGFTreeInsertionError(SGFTreeError):
+    pass
