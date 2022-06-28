@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from .prop import SGFProp
+    from .prop import SGFProperty
     from .node import SGFNode
-    from .tree import SGFTree
+    from .tree import SGFGameTree
 
 
 class NavigationError(Exception):
@@ -11,10 +11,10 @@ class NavigationError(Exception):
 
 
 class SGFCursor:
-    def __init__(self, tree: "SGFTree"):
+    def __init__(self, tree: "SGFGameTree"):
         self.root_tree = self.tree = tree
         self.index = 0
-        self._stack: List["SGFTree"] = []
+        self._stack: List["SGFGameTree"] = []
 
     @property
     def current_node(self) -> "SGFNode":
@@ -41,7 +41,7 @@ class SGFCursor:
             else:
                 raise NavigationError("Invalid variation number.")
         else:
-            raise NavigationError("Reached end of SGFTree.")
+            raise NavigationError("Reached end of SGFGameTree.")
 
         return self.current_node
 
@@ -52,12 +52,12 @@ class SGFCursor:
             self.tree = self._stack.pop()
             self.index = len(self.tree.nodes) - 1
         else:
-            raise NavigationError("Reached start of SGFTree.")
+            raise NavigationError("Reached start of SGFGameTree.")
 
         return self.current_node
 
-    def insert_tree(self, tree: "SGFTree"):
+    def insert_tree(self, tree: "SGFGameTree"):
         return self.tree.insert(tree, self.index)
 
-    def insert_prop(self, prop: "SGFProp"):
+    def insert_prop(self, prop: "SGFProperty"):
         self.current_node.props.append(prop)

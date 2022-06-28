@@ -1,8 +1,8 @@
-class SGFPropValueParseError(Exception):
+class SGFPropertyValueParseError(Exception):
     pass
 
 
-class SGFPropParseError(Exception):
+class SGFPropertyParseError(Exception):
     pass
 
 
@@ -10,23 +10,23 @@ class SGFNodeParseError(Exception):
     pass
 
 
-class SGFTreeParseError(Exception):
+class SGFGameTreeParseError(Exception):
     pass
 
 
-class SGFPropError(Exception):
+class SGFPropertyError(Exception):
     pass
 
 
-class EmptySGFPropValueError(SGFPropError):
+class EmptySGFPropertyValueError(SGFPropertyError):
     pass
 
 
-class DuplicateSGFPropValueError(SGFPropError):
+class DuplicateSGFPropertyValueError(SGFPropertyError):
     pass
 
 
-class SGFPropValueNotFoundError(SGFPropError):
+class SGFPropertyValueNotFoundError(SGFPropertyError):
     pass
 
 
@@ -34,21 +34,21 @@ class SGFNodeError(Exception):
     pass
 
 
-class DuplicateSGFPropError(SGFNodeError):
+class DuplicateSGFPropertyError(SGFNodeError):
     pass
 
 
-class SGFPropNotFoundError(SGFNodeError):
+class SGFPropertyNotFoundError(SGFNodeError):
     pass
 
 
-class SGFTreeError(Exception):
+class SGFGameTreeError(Exception):
     pass
 
 
-class EmptySGFTreeError(SGFTreeError):
+class EmptySGFGameTreeError(SGFGameTreeError):
     pass
 
 
-class SGFTreeInsertionError(SGFTreeError):
+class SGFGameTreeInsertionError(SGFGameTreeError):
     pass

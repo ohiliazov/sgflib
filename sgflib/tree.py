@@ -1,13 +1,13 @@
 from typing import List
 
 from .node import SGFNode
-from .exceptions import EmptySGFTreeError, SGFTreeInsertionError
+from .exceptions import EmptySGFGameTreeError, SGFGameTreeInsertionError
 
 
-class SGFTree:
-    def __init__(self, nodes: List[SGFNode], variations: List["SGFTree"] = None):
+class SGFGameTree:
+    def __init__(self, nodes: List[SGFNode], variations: List["SGFGameTree"] = None):
         if not nodes:
-            raise EmptySGFTreeError("Expected at least one SGFNode in nodes.")
+            raise EmptySGFGameTreeError("Expected at least one SGFNode in nodes.")
 
         self.nodes = nodes
         self.variations = variations or []
@@ -16,12 +16,12 @@ class SGFTree:
         return "(" + "".join(map(str, self.nodes)) + "".join(map(str, self.variations)) + ")"
 
     def __repr__(self):
-        return f"SGFTree({str(self)})"
+        return f"SGFGameTree({str(self)})"
 
     def __hash__(self):
         return hash(repr(self))
 
-    def __eq__(self, other: "SGFTree"):
+    def __eq__(self, other: "SGFGameTree"):
         return self.nodes == other.nodes and self.variations == other.variations
 
     def pretty(self, offset: int = 0, indent: int = 2):
@@ -39,11 +39,11 @@ class SGFTree:
             s += "\n" + variation.repr(offset + indent, indent)
         return s
 
-    def insert(self, tree: "SGFTree", index: int):
+    def insert(self, tree: "SGFGameTree", index: int):
         if index < 1:
-            raise SGFTreeInsertionError("Cannot insert SGFTree to the beginning")
+            raise SGFGameTreeInsertionError("Cannot insert SGFGameTree to the beginning")
         if index < len(self.nodes):
-            self.variations = [SGFTree(self.nodes[index:], self.variations), tree]
+            self.variations = [SGFGameTree(self.nodes[index:], self.variations), tree]
             self.nodes = self.nodes[:index]
         elif self.variations:
             self.variations.append(tree)
@@ -51,4 +51,4 @@ class SGFTree:
             self.nodes.extend(tree.nodes)
             self.variations = tree.variations
         else:
-            raise SGFTreeInsertionError("Index out of bounds of SGFTree.")
+            raise SGFGameTreeInsertionError("Index out of bounds of SGFGameTree.")

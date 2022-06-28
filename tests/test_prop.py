@@ -1,7 +1,7 @@
 import pytest
 
-from sgflib import SGFProp
-from sgflib.exceptions import DuplicateSGFPropValueError, EmptySGFPropValueError, SGFPropValueNotFoundError
+from sgflib import SGFProperty
+from sgflib.exceptions import DuplicateSGFPropertyValueError, EmptySGFPropertyValueError, SGFPropertyValueNotFoundError
 
 
 @pytest.mark.parametrize(
@@ -15,41 +15,41 @@ from sgflib.exceptions import DuplicateSGFPropValueError, EmptySGFPropValueError
     ]
 )
 def test_print_prop(label, values, expected):
-    prop = SGFProp(label, values)
+    prop = SGFProperty(label, values)
     assert str(prop) == expected
-    assert repr(prop) == f"SGFProp({expected})"
+    assert repr(prop) == f"SGFProperty({expected})"
 
 
 def test_prop_add_value():
-    prop = SGFProp("AB", ["dd"])
+    prop = SGFProperty("AB", ["dd"])
     prop.add("pp")
 
     assert prop.values == {"dd", "pp"}
 
 
 def test_prop_remove_value():
-    prop = SGFProp("AB", ["dd", "pp"])
+    prop = SGFProperty("AB", ["dd", "pp"])
     prop.remove("pp")
 
     assert prop.values == {"dd"}
 
 
 def test_prop_add_duplicate_value():
-    prop = SGFProp("AB", ["dd"])
+    prop = SGFProperty("AB", ["dd"])
 
-    with pytest.raises(DuplicateSGFPropValueError):
+    with pytest.raises(DuplicateSGFPropertyValueError):
         prop.add("dd")
 
 
 def test_prop_remove_last_value():
-    prop = SGFProp("AB", ["dd"])
+    prop = SGFProperty("AB", ["dd"])
 
-    with pytest.raises(EmptySGFPropValueError):
+    with pytest.raises(EmptySGFPropertyValueError):
         prop.remove("dd")
 
 
 def test_prop_remove_absent_value():
-    prop = SGFProp("AB", ["dd"])
+    prop = SGFProperty("AB", ["dd"])
 
-    with pytest.raises(SGFPropValueNotFoundError):
+    with pytest.raises(SGFPropertyValueNotFoundError):
         prop.remove("pp")

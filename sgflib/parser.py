@@ -3,15 +3,15 @@ from pathlib import Path
 from typing import Pattern, Match, List, Type
 
 from .exceptions import (
-    SGFPropValueParseError,
-    SGFPropParseError,
+    SGFPropertyValueParseError,
+    SGFPropertyParseError,
     SGFNodeParseError,
-    SGFTreeParseError,
+    SGFGameTreeParseError,
 )
 from .helpers import convert_control_chars
-from .prop import SGFProp
+from .prop import SGFProperty
 from .node import SGFNode
-from .tree import SGFTree
+from .tree import SGFGameTree
 
 reGameTreeStart = re.compile(r"\s*\(")
 reGameTreeEnd = re.compile(r'\s*\)')
@@ -34,9 +34,9 @@ class SGFParser:
     def _search(self, pattern: Pattern) -> Match:
         return pattern.search(self.data, self.index)
 
-    def parse_game_trees(self) -> List[SGFTree]:
+    def parse_game_trees(self) -> List[SGFGameTree]:
         """
-        Parses multiple SGFTrees.
+        Parses multiple SGFGameTrees.
 
         Called when "(" encountered.
         Finishes when last ")" encountered.
@@ -45,14 +45,14 @@ class SGFParser:
         try:
             while True:
                 trees.append(self.parse_tree())
-        except SGFTreeParseError:
+        except SGFGameTreeParseError:
             return trees
 
-    def parse_tree(self) -> SGFTree:
+    def parse_tree(self) -> SGFGameTree:
         """
-        Parses single SGFTree, which contains multiple SGFNodes and SGFTrees (variations).
+        Parses single SGFGameTree, which contains multiple SGFNodes and SGFGameTrees (variations).
 
-        SGFTree example:
+        SGFGameTree example:
             - (;B[dd])
             - (;B[dd];W[pp](;B[dp];W[pd])(;B[pd];W[dp]))
         Called when "(" encountered.
@@ -60,7 +60,7 @@ class SGFParser:
         """
         match = self._match(reGameTreeStart)
         if not match:
-            raise SGFTreeParseError("Expected `(` at the start of SGFTree.")
+            raise SGFGameTreeParseError("Expected `(` at the start of SGFGameTree.")
 
         # consume "("
         self.index = match.end()
@@ -71,29 +71,29 @@ class SGFParser:
                 nodes.append(self.parse_node())
         except SGFNodeParseError:
             if not nodes:
-                raise SGFTreeParseError("Expected at least one SGFNode.")
+                raise SGFGameTreeParseError("Expected at least one SGFNode.")
 
         variations = self.parse_game_trees()
 
         match = self._match(reGameTreeEnd)
 
         if not match:
-            raise SGFTreeParseError("Expected `)` at the end of SGFTree.")
+            raise SGFGameTreeParseError("Expected `)` at the end of SGFGameTree.")
 
         # consume ")"
         self.index = match.end()
 
-        return SGFTree(nodes, variations)
+        return SGFGameTree(nodes, variations)
 
     def parse_node(self) -> SGFNode:
         """
-        Parses single SGFNode, which contains multiple SGFProps.
+        Parses single SGFNode, which contains multiple SGFPropertys.
 
         Called when ";" encountered.
         SGFNode ends when encountered one of the following:
             ";" - next SGFNode starts
-            "(" - variation SGFTree starts
-            ")" - SGFTree ends
+            "(" - variation SGFGameTree starts
+            ")" - SGFGameTree ends
         """
         match = self._match(reNodeStart)
 
@@ -103,45 +103,45 @@ class SGFParser:
         # consume ";"
         self.index = match.end()
 
-        # parse SGFProps till ";", "(" or ")"
+        # parse SGFPropertys till ";", "(" or ")"
         props = []
         try:
             while True:
                 props.append(self.parse_prop())
-        except SGFPropParseError:
+        except SGFPropertyParseError:
             pass
 
         return SGFNode(props)
 
-    def parse_prop(self) -> SGFProp:
+    def parse_prop(self) -> SGFProperty:
         """
-        Parses single SGFProp.
+        Parses single SGFProperty.
 
-        Called when SGFProp label encountered.
-        Finishes when last SGFProp value is parsed.
+        Called when SGFProperty label encountered.
+        Finishes when last SGFProperty value is parsed.
         """
         match = self._match(rePropLabel)
 
         if not match:
-            raise SGFPropParseError("Expected `[a-zA-Z]` at the start of SGFProp.")
+            raise SGFPropertyParseError("Expected `[a-zA-Z]` at the start of SGFProperty.")
 
-        # consume SGFProp label
+        # consume SGFProperty label
         self.index = match.end()
 
         prop_values = []
         try:
             while True:
                 prop_values.append(self.parse_prop_value())
-        except SGFPropValueParseError:
+        except SGFPropertyValueParseError:
             if not prop_values:
-                raise SGFPropParseError("Expected at least one SGFProp value.")
+                raise SGFPropertyParseError("Expected at least one SGFProperty value.")
 
-        prop = SGFProp(match.group(0), prop_values)
+        prop = SGFProperty(match.group(0), prop_values)
         return prop
 
     def parse_prop_value(self) -> str:
         """
-        Parses single SGFProp value.
+        Parses single SGFProperty value.
 
         Called when "[" encountered.
         Finishes when matching "]" encountered.
@@ -151,7 +151,7 @@ class SGFParser:
         match = self._match(rePropValueStart)
 
         if not match:
-            raise SGFPropValueParseError("Expected `[` at the start of SGFProp value.")
+            raise SGFPropertyValueParseError("Expected `[` at the start of SGFProperty value.")
 
         # consume "["
         self.index = match.end()
@@ -165,19 +165,19 @@ class SGFParser:
 
             match_end = self._search(rePropValueEnd)
             if not match_end:
-                raise SGFPropValueParseError("Expected `]` at the end of SGFProp value.")
+                raise SGFPropertyValueParseError("Expected `]` at the end of SGFProperty value.")
 
             match_escape = self._search(reEscape)
 
             if not match_escape or match_escape.end() > match_end.end():
-                # no more escaped characters in the SGFProp value
+                # no more escaped characters in the SGFProperty value
                 break
 
-            # add contents of SGFProp without `\\`
+            # add contents of SGFProperty without `\\`
             data += self.data[self.index:match_escape.start()] + self.data[match_escape.end() - 1]
             self.index = match_escape.end()
 
-        # add contents of SGFProp value
+        # add contents of SGFProperty value
         data += self.data[self.index:match_end.start()]
 
         # consume "]"

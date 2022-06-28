@@ -1,18 +1,18 @@
 import pytest
 
-from sgflib import SGFNode, SGFProp
-from sgflib.exceptions import DuplicateSGFPropError, SGFPropNotFoundError
+from sgflib import SGFNode, SGFProperty
+from sgflib.exceptions import DuplicateSGFPropertyError, SGFPropertyNotFoundError
 
 
 @pytest.mark.parametrize(
     "props, expected",
     [
         ([], ";"),
-        ([SGFProp("B", ["dd"])], ";B[dd]"),
+        ([SGFProperty("B", ["dd"])], ";B[dd]"),
         (
             [
-                SGFProp("AB", ["dd", "pp"]),
-                SGFProp("C", ["John Doe [3d] \\UA\\"]),
+                SGFProperty("AB", ["dd", "pp"]),
+                SGFProperty("C", ["John Doe [3d] \\UA\\"]),
             ],
             ";AB[dd][pp]C[John Doe [3d\\] \\\\UA\\\\]"
         ),
@@ -25,39 +25,39 @@ def test_print_node(props, expected):
 
 
 def test_node_ops():
-    node = SGFNode([SGFProp("AB", {"dd"})])
+    node = SGFNode([SGFProperty("AB", {"dd"})])
 
-    node.add(SGFProp("AW", {"pp"}))
+    node.add(SGFProperty("AW", {"pp"}))
     assert len(node) == 2
-    assert node.props == {SGFProp("AB", {"dd"}), SGFProp("AW", {"pp"})}
+    assert node.props == {SGFProperty("AB", {"dd"}), SGFProperty("AW", {"pp"})}
 
-    with pytest.raises(DuplicateSGFPropError):
-        node.add(SGFProp("AW", {"pp"}))
+    with pytest.raises(DuplicateSGFPropertyError):
+        node.add(SGFProperty("AW", {"pp"}))
 
     node.remove("AW")
-    assert node.props == {SGFProp("AB", {"dd"})}
+    assert node.props == {SGFProperty("AB", {"dd"})}
 
-    with pytest.raises(SGFPropNotFoundError):
+    with pytest.raises(SGFPropertyNotFoundError):
         node.remove("AW")
 
 
 def test_node_as_dict():
     node = SGFNode()
     node["AB"] = {"dd"}
-    assert node.props == {SGFProp("AB", {"dd"})}
+    assert node.props == {SGFProperty("AB", {"dd"})}
 
-    assert node["AB"] == SGFProp("AB", {"dd"})
+    assert node["AB"] == SGFProperty("AB", {"dd"})
 
-    with pytest.raises(SGFPropNotFoundError):
+    with pytest.raises(SGFPropertyNotFoundError):
         _ = node["C"]
 
     node["AW"] = {"pp"}
-    assert node.props == {SGFProp("AB", {"dd"}), SGFProp("AW", {"pp"})}
+    assert node.props == {SGFProperty("AB", {"dd"}), SGFProperty("AW", {"pp"})}
 
-    with pytest.raises(DuplicateSGFPropError):
+    with pytest.raises(DuplicateSGFPropertyError):
         node["AW"] = {"pp"}
 
     del node["AW"]
-    assert node.props == {SGFProp("AB", {"dd"})}
-    with pytest.raises(SGFPropNotFoundError):
+    assert node.props == {SGFProperty("AB", {"dd"})}
+    with pytest.raises(SGFPropertyNotFoundError):
         del node["AW"]
