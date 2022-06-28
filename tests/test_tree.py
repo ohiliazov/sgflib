@@ -14,7 +14,7 @@ from sgflib.exceptions import EmptySGFGameTreeError, SGFGameTreeInsertionError
                 SGFNode([SGFProperty("W", {"pd"})]),
             ],
             [],
-            "(;AB[dd][pp];W[pd])"
+            "(;AB[dd][pp];W[pd])",
         ),
         (
             [
@@ -32,9 +32,9 @@ from sgflib.exceptions import EmptySGFGameTreeError, SGFGameTreeInsertionError
                     ]
                 ),
             ],
-            "(;B[dd](;W[pd])(;W[dp]))"
-        )
-    ]
+            "(;B[dd](;W[pd])(;W[dp]))",
+        ),
+    ],
 )
 def test_print_tree(nodes, variations, expected):
     tree = SGFGameTree(nodes, variations)
@@ -48,7 +48,9 @@ def test_tree_ops():
 
     tree = SGFGameTree(nodes=[SGFNode([SGFProperty("C", {"Root tree."})])])
 
-    moves = SGFGameTree(nodes=[SGFNode([SGFProperty("B", {"dd"})]), SGFNode([SGFProperty("W", {"pp"})])])
+    moves = SGFGameTree(
+        nodes=[SGFNode([SGFProperty("B", {"dd"})]), SGFNode([SGFProperty("W", {"pp"})])]
+    )
 
     with pytest.raises(SGFGameTreeInsertionError):
         tree.insert(moves, 0)
@@ -78,7 +80,7 @@ def test_tree_ops():
         variations=[
             SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"pp"})])]),
             SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"pq"})])]),
-        ]
+        ],
     )
 
     white_move_3 = SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"qq"})])])
@@ -94,5 +96,5 @@ def test_tree_ops():
             SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"pp"})])]),
             SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"pq"})])]),
             SGFGameTree(nodes=[SGFNode([SGFProperty("W", {"qq"})])]),
-        ]
+        ],
     )

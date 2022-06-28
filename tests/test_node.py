@@ -14,9 +14,9 @@ from sgflib.exceptions import DuplicateSGFPropertyError, SGFPropertyNotFoundErro
                 SGFProperty("AB", ["dd", "pp"]),
                 SGFProperty("C", ["John Doe [3d] \\UA\\"]),
             ],
-            ";AB[dd][pp]C[John Doe [3d\\] \\\\UA\\\\]"
+            ";AB[dd][pp]C[John Doe [3d\\] \\\\UA\\\\]",
         ),
-    ]
+    ],
 )
 def test_print_node(props, expected):
     node = SGFNode(props)

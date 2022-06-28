@@ -1,7 +1,11 @@
 import pytest
 
 from sgflib import SGFProperty
-from sgflib.exceptions import DuplicateSGFPropertyValueError, EmptySGFPropertyValueError, SGFPropertyValueNotFoundError
+from sgflib.exceptions import (
+    DuplicateSGFPropertyValueError,
+    EmptySGFPropertyValueError,
+    SGFPropertyValueNotFoundError,
+)
 
 
 @pytest.mark.parametrize(
@@ -12,7 +16,7 @@ from sgflib.exceptions import DuplicateSGFPropertyValueError, EmptySGFPropertyVa
         ("AB", ["dd", "pp"], "AB[dd][pp]"),
         ("AB", ["pp", "dd", "pp"], "AB[dd][pp]"),
         ("C", ["John Doe [3d] \\UA\\"], "C[John Doe [3d\\] \\\\UA\\\\]"),
-    ]
+    ],
 )
 def test_print_prop(label, values, expected):
     prop = SGFProperty(label, values)

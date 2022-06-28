@@ -13,7 +13,12 @@ class SGFGameTree:
         self.variations = variations or []
 
     def __str__(self):
-        return "(" + "".join(map(str, self.nodes)) + "".join(map(str, self.variations)) + ")"
+        return (
+            "("
+            + "".join(map(str, self.nodes))
+            + "".join(map(str, self.variations))
+            + ")"
+        )
 
     def __repr__(self):
         return f"SGFGameTree({str(self)})"
@@ -25,9 +30,14 @@ class SGFGameTree:
         return self.nodes == other.nodes and self.variations == other.variations
 
     def pretty(self, offset: int = 0, indent: int = 2):
-        s = " " * offset + "(\n" + " " * (offset+indent) + "".join(map(str, self.nodes))
+        s = (
+            " " * offset
+            + "(\n"
+            + " " * (offset + indent)
+            + "".join(map(str, self.nodes))
+        )
         for tree in self.variations:
-            s += "\n" + " " * offset + tree.pretty(offset+indent, indent)
+            s += "\n" + " " * offset + tree.pretty(offset + indent, indent)
         return s + "\n" + " " * offset + ")"
 
     def repr(self, offset: int = 0, indent: int = 2):
@@ -40,15 +50,15 @@ class SGFGameTree:
         return s
 
     def insert(self, tree: "SGFGameTree", index: int):
-        if index < 1:
-            raise SGFGameTreeInsertionError("Cannot insert SGFGameTree to the beginning")
+        if index < 1 or index > len(self.nodes):
+            raise SGFGameTreeInsertionError(
+                f"Cannot insert SGFGameTree at index={index}."
+            )
         if index < len(self.nodes):
             self.variations = [SGFGameTree(self.nodes[index:], self.variations), tree]
             self.nodes = self.nodes[:index]
         elif self.variations:
             self.variations.append(tree)
-        elif index == len(self.nodes):
+        else:
             self.nodes.extend(tree.nodes)
             self.variations = tree.variations
-        else:
-            raise SGFGameTreeInsertionError("Index out of bounds of SGFGameTree.")

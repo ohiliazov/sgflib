@@ -1,7 +1,7 @@
 from typing import Iterable
 from .exceptions import DuplicateSGFPropertyError, SGFPropertyNotFoundError
 
-from .prop import SGFProperty
+from .property import SGFProperty
 
 
 class SGFNode:

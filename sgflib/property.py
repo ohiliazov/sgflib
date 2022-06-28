@@ -1,7 +1,11 @@
 from typing import Iterable
 
 from .helpers import escape_text
-from .exceptions import DuplicateSGFPropertyValueError, EmptySGFPropertyValueError, SGFPropertyValueNotFoundError
+from .exceptions import (
+    DuplicateSGFPropertyValueError,
+    EmptySGFPropertyValueError,
+    SGFPropertyValueNotFoundError,
+)
 
 
 class SGFProperty:

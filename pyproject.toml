@@ -10,7 +10,11 @@ coverage = "^6.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
+pre-commit = "^2.19.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-lenght = 120

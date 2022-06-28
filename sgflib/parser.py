@@ -1,6 +1,5 @@
 import re
-from pathlib import Path
-from typing import Pattern, Match, List, Type
+from typing import Pattern, Match, List
 
 from .exceptions import (
     SGFPropertyValueParseError,
@@ -9,18 +8,18 @@ from .exceptions import (
     SGFGameTreeParseError,
 )
 from .helpers import convert_control_chars
-from .prop import SGFProperty
+from .property import SGFProperty
 from .node import SGFNode
-from .tree import SGFGameTree
+from .game_tree import SGFGameTree
 
 reGameTreeStart = re.compile(r"\s*\(")
-reGameTreeEnd = re.compile(r'\s*\)')
+reGameTreeEnd = re.compile(r"\s*\)")
 reNodeStart = re.compile(r"\s*;")
 rePropLabel = re.compile(r"\s*([a-zA-Z]+)(?=\s*\[)")
-rePropValueStart = re.compile(r'\s*\[')
-rePropValueEnd = re.compile(r']')
-reEscape = re.compile(r'\\[]\\]')
-reLineBreak = re.compile(r'(\r\n?|\n\r?)*')
+rePropValueStart = re.compile(r"\s*\[")
+rePropValueEnd = re.compile(r"]")
+reEscape = re.compile(r"\\[]\\]")
+reLineBreak = re.compile(r"(\r\n?|\n\r?)*")
 
 
 class SGFParser:
@@ -123,7 +122,9 @@ class SGFParser:
         match = self._match(rePropLabel)
 
         if not match:
-            raise SGFPropertyParseError("Expected `[a-zA-Z]` at the start of SGFProperty.")
+            raise SGFPropertyParseError(
+                "Expected `[a-zA-Z]` at the start of SGFProperty."
+            )
 
         # consume SGFProperty label
         self.index = match.end()
@@ -151,7 +152,9 @@ class SGFParser:
         match = self._match(rePropValueStart)
 
         if not match:
-            raise SGFPropertyValueParseError("Expected `[` at the start of SGFProperty value.")
+            raise SGFPropertyValueParseError(
+                "Expected `[` at the start of SGFProperty value."
+            )
 
         # consume "["
         self.index = match.end()
@@ -165,7 +168,9 @@ class SGFParser:
 
             match_end = self._search(rePropValueEnd)
             if not match_end:
-                raise SGFPropertyValueParseError("Expected `]` at the end of SGFProperty value.")
+                raise SGFPropertyValueParseError(
+                    "Expected `]` at the end of SGFProperty value."
+                )
 
             match_escape = self._search(reEscape)
 
@@ -174,11 +179,14 @@ class SGFParser:
                 break
 
             # add contents of SGFProperty without `\\`
-            data += self.data[self.index:match_escape.start()] + self.data[match_escape.end() - 1]
+            data += (
+                self.data[self.index : match_escape.start()]
+                + self.data[match_escape.end() - 1]
+            )
             self.index = match_escape.end()
 
         # add contents of SGFProperty value
-        data += self.data[self.index:match_end.start()]
+        data += self.data[self.index : match_end.start()]
 
         # consume "]"
         self.index = match_end.end()
