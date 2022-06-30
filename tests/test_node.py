@@ -1,19 +1,18 @@
 import pytest
 
-from sgflib import SGFNode, SGFProperty
-from sgflib.exceptions import DuplicateSGFPropertyError, SGFPropertyNotFoundError
+from sgflib import SGFNode
 
 
 @pytest.mark.parametrize(
     "props, expected",
     [
-        ([], ";"),
-        ([SGFProperty("B", ["dd"])], ";B[dd]"),
+        ({}, ";"),
+        ({"B": ["dd"]}, ";B[dd]"),
         (
-            [
-                SGFProperty("AB", ["dd", "pp"]),
-                SGFProperty("C", ["John Doe [3d] \\UA\\"]),
-            ],
+            {
+                "AB": ["dd", "pp"],
+                "C": ["John Doe [3d] \\UA\\"],
+            },
             ";AB[dd][pp]C[John Doe [3d\\] \\\\UA\\\\]",
         ),
     ],
@@ -25,39 +24,24 @@ def test_print_node(props, expected):
 
 
 def test_node_ops():
-    node = SGFNode([SGFProperty("AB", {"dd"})])
-
-    node.add(SGFProperty("AW", {"pp"}))
-    assert len(node) == 2
-    assert node.props == {SGFProperty("AB", {"dd"}), SGFProperty("AW", {"pp"})}
-
-    with pytest.raises(DuplicateSGFPropertyError):
-        node.add(SGFProperty("AW", {"pp"}))
-
-    node.remove("AW")
-    assert node.props == {SGFProperty("AB", {"dd"})}
-
-    with pytest.raises(SGFPropertyNotFoundError):
-        node.remove("AW")
-
-
-def test_node_as_dict():
     node = SGFNode()
     node["AB"] = {"dd"}
-    assert node.props == {SGFProperty("AB", {"dd"})}
+    assert node == {"AB": {"dd"}}
 
-    assert node["AB"] == SGFProperty("AB", {"dd"})
+    assert node["AB"] == {"dd"}
 
-    with pytest.raises(SGFPropertyNotFoundError):
+    with pytest.raises(KeyError):
         _ = node["C"]
 
+    # insert new property
     node["AW"] = {"pp"}
-    assert node.props == {SGFProperty("AB", {"dd"}), SGFProperty("AW", {"pp"})}
+    assert node == {"AB": {"dd"}, "AW": {"pp"}}
 
-    with pytest.raises(DuplicateSGFPropertyError):
-        node["AW"] = {"pp"}
+    # update existing property
+    node["AW"] = {"pq"}
+    assert node == {"AB": {"dd"}, "AW": {"pq"}}
 
     del node["AW"]
-    assert node.props == {SGFProperty("AB", {"dd"})}
-    with pytest.raises(SGFPropertyNotFoundError):
+    assert node == {"AB": {"dd"}}
+    with pytest.raises(KeyError):
         del node["AW"]

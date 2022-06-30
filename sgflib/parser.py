@@ -1,21 +1,18 @@
 import re
 from typing import Pattern, Match, List
 
-from .exceptions import (
-    SGFPropertyValueParseError,
-    SGFPropertyParseError,
-    SGFNodeParseError,
-    SGFGameTreeParseError,
-)
-from .helpers import convert_control_chars
+from .exceptions import SGFParserError
+from .utils import convert_control_chars
+from .collection import SGFCollection
 from .property import SGFProperty
 from .node import SGFNode
+from .sequence import SGFSequence
 from .game_tree import SGFGameTree
 
 reGameTreeStart = re.compile(r"\s*\(")
 reGameTreeEnd = re.compile(r"\s*\)")
 reNodeStart = re.compile(r"\s*;")
-rePropLabel = re.compile(r"\s*([a-zA-Z]+)(?=\s*\[)")
+rePropLabel = re.compile(r"\s*([a-zA-Z]+)")
 rePropValueStart = re.compile(r"\s*\[")
 rePropValueEnd = re.compile(r"]")
 reEscape = re.compile(r"\\[]\\]")
@@ -33,6 +30,23 @@ class SGFParser:
     def _search(self, pattern: Pattern) -> Match:
         return pattern.search(self.data, self.index)
 
+    def parse_collection(self) -> SGFCollection:
+        """
+        Parse multiple SGFGameTrees into SGFCollection.
+
+        Called when "(" encountered.
+        Finishes when last ")" encountered.
+        """
+        game_trees = self.parse_game_trees()
+
+        if not game_trees:
+            raise SGFParserError("Expecting SGFCollection", self.data, self.index)
+
+        if self.index != len(self.data) and not self.data[self.index :].isspace():
+            raise SGFParserError("Extra data", self.data, self.index)
+
+        return SGFCollection(game_trees)
+
     def parse_game_trees(self) -> List[SGFGameTree]:
         """
         Parses multiple SGFGameTrees.
@@ -43,11 +57,11 @@ class SGFParser:
         trees = []
         try:
             while True:
-                trees.append(self.parse_tree())
-        except SGFGameTreeParseError:
+                trees.append(self.parse_game_tree())
+        except SGFParserError:
             return trees
 
-    def parse_tree(self) -> SGFGameTree:
+    def parse_game_tree(self) -> SGFGameTree:
         """
         Parses single SGFGameTree, which contains multiple SGFNodes and SGFGameTrees (variations).
 
@@ -59,30 +73,33 @@ class SGFParser:
         """
         match = self._match(reGameTreeStart)
         if not match:
-            raise SGFGameTreeParseError("Expected `(` at the start of SGFGameTree.")
+            raise SGFParserError("Expecting SGFGameTree", self.data, self.index)
 
         # consume "("
         self.index = match.end()
 
-        nodes = []
-        try:
-            while True:
-                nodes.append(self.parse_node())
-        except SGFNodeParseError:
-            if not nodes:
-                raise SGFGameTreeParseError("Expected at least one SGFNode.")
-
+        sequence = self.parse_sequence()
         variations = self.parse_game_trees()
 
         match = self._match(reGameTreeEnd)
 
         if not match:
-            raise SGFGameTreeParseError("Expected `)` at the end of SGFGameTree.")
+            raise SGFParserError("Unterminated SGFGameTree", self.data, self.index)
 
         # consume ")"
         self.index = match.end()
 
-        return SGFGameTree(nodes, variations)
+        return SGFGameTree(sequence, variations)
+
+    def parse_sequence(self) -> SGFSequence:
+        nodes = []
+        try:
+            while True:
+                nodes.append(self.parse_node())
+        except SGFParserError:
+            if not nodes:
+                raise SGFParserError("Expecting SGFSequence", self.data, self.index)
+        return SGFSequence(nodes)
 
     def parse_node(self) -> SGFNode:
         """
@@ -97,22 +114,22 @@ class SGFParser:
         match = self._match(reNodeStart)
 
         if not match:
-            raise SGFNodeParseError("Expected `;` at the start of SGFNode.")
+            raise SGFParserError("Expecting SGFNode", self.data, self.index)
 
         # consume ";"
         self.index = match.end()
 
-        # parse SGFPropertys till ";", "(" or ")"
+        # parse SGFProperties till ";", "(" or ")"
         props = []
         try:
             while True:
-                props.append(self.parse_prop())
-        except SGFPropertyParseError:
+                props.append(self.parse_property())
+        except SGFParserError:
             pass
 
-        return SGFNode(props)
+        return SGFNode.from_properties(props)
 
-    def parse_prop(self) -> SGFProperty:
+    def parse_property(self) -> SGFProperty:
         """
         Parses single SGFProperty.
 
@@ -122,9 +139,7 @@ class SGFParser:
         match = self._match(rePropLabel)
 
         if not match:
-            raise SGFPropertyParseError(
-                "Expected `[a-zA-Z]` at the start of SGFProperty."
-            )
+            raise SGFParserError("Expecting SGFProperty", self.data, self.index)
 
         # consume SGFProperty label
         self.index = match.end()
@@ -133,9 +148,9 @@ class SGFParser:
         try:
             while True:
                 prop_values.append(self.parse_prop_value())
-        except SGFPropertyValueParseError:
+        except SGFParserError as err:
             if not prop_values:
-                raise SGFPropertyParseError("Expected at least one SGFProperty value.")
+                raise err
 
         prop = SGFProperty(match.group(0), prop_values)
         return prop
@@ -152,9 +167,7 @@ class SGFParser:
         match = self._match(rePropValueStart)
 
         if not match:
-            raise SGFPropertyValueParseError(
-                "Expected `[` at the start of SGFProperty value."
-            )
+            raise SGFParserError("Expecting SGFProperty value", self.data, self.index)
 
         # consume "["
         self.index = match.end()
@@ -168,8 +181,8 @@ class SGFParser:
 
             match_end = self._search(rePropValueEnd)
             if not match_end:
-                raise SGFPropertyValueParseError(
-                    "Expected `]` at the end of SGFProperty value."
+                raise SGFParserError(
+                    "Unterminated SGFProperty value", self.data, self.index
                 )
 
             match_escape = self._search(reEscape)

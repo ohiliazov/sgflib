@@ -1,20 +1,15 @@
-class SGFPropertyValueParseError(Exception):
-    pass
+from json import JSONDecodeError
 
 
-class SGFPropertyParseError(Exception):
-    pass
-
-
-class SGFNodeParseError(Exception):
-    pass
-
-
-class SGFGameTreeParseError(Exception):
+class SGFParserError(JSONDecodeError):
     pass
 
 
 class SGFPropertyError(Exception):
+    pass
+
+
+class SGFPropertyValueError(Exception):
     pass
 
 
@@ -30,25 +25,13 @@ class SGFPropertyValueNotFoundError(SGFPropertyError):
     pass
 
 
-class SGFNodeError(Exception):
-    pass
-
-
-class DuplicateSGFPropertyError(SGFNodeError):
-    pass
-
-
-class SGFPropertyNotFoundError(SGFNodeError):
-    pass
-
-
 class SGFGameTreeError(Exception):
     pass
 
 
-class EmptySGFGameTreeError(SGFGameTreeError):
+class SGFSequenceError(Exception):
     pass
 
 
-class SGFGameTreeInsertionError(SGFGameTreeError):
+class SGFCursorError(Exception):
     pass

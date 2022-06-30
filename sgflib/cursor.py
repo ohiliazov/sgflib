@@ -1,37 +1,23 @@
-from typing import TYPE_CHECKING, List
+from typing import List
 
-if TYPE_CHECKING:
-    from .prop import SGFProperty
-    from .node import SGFNode
-    from .tree import SGFGameTree
-
-
-class NavigationError(Exception):
-    pass
+from . import SGFNode, SGFGameTree
+from .exceptions import SGFCursorError
 
 
 class SGFCursor:
-    def __init__(self, tree: "SGFGameTree"):
+    def __init__(self, tree: SGFGameTree):
         self.root_tree = self.tree = tree
         self.index = 0
-        self._stack: List["SGFGameTree"] = []
+        self._stack: List[SGFGameTree] = []
 
     @property
-    def current_node(self) -> "SGFNode":
-        return self.tree.nodes[self.index]
+    def node(self) -> SGFNode:
+        return self.tree.sequence[self.index]
 
-    @property
-    def at_start(self) -> bool:
-        return self.index == 0 and not self._stack
-
-    @property
-    def at_end(self) -> bool:
-        return self.index == len(self.tree.nodes) - 1 and not self.tree.variations
-
-    def next(self, variation: int = 0) -> "SGFNode":
-        if self.index + 1 < len(self.tree.nodes):
+    def next(self, variation: int = 0) -> SGFNode:
+        if self.index + 1 < len(self.tree.sequence):
             if variation != 0:
-                raise NavigationError("Invalid variation number.")
+                raise SGFCursorError("Invalid variation number.")
             self.index += 1
         elif self.tree.variations:
             if variation < len(self.tree.variations):
@@ -39,25 +25,19 @@ class SGFCursor:
                 self.tree = self.tree.variations[variation]
                 self.index = 0
             else:
-                raise NavigationError("Invalid variation number.")
+                raise SGFCursorError("Invalid variation number.")
         else:
-            raise NavigationError("Reached end of SGFGameTree.")
+            raise SGFCursorError("Reached end of SGFGameTree.")
 
-        return self.current_node
+        return self.node
 
-    def previous(self) -> "SGFNode":
+    def previous(self) -> SGFNode:
         if self.index:
             self.index -= 1
         elif self._stack:
             self.tree = self._stack.pop()
-            self.index = len(self.tree.nodes) - 1
+            self.index = len(self.tree.sequence) - 1
         else:
-            raise NavigationError("Reached start of SGFGameTree.")
+            raise SGFCursorError("Reached start of SGFGameTree.")
 
-        return self.current_node
-
-    def insert_tree(self, tree: "SGFGameTree"):
-        return self.tree.insert(tree, self.index)
-
-    def insert_prop(self, prop: "SGFProperty"):
-        self.current_node.props.append(prop)
+        return self.node

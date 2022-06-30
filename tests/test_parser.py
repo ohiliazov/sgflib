@@ -1,12 +1,13 @@
 import pytest
 
-from sgflib import SGFProperty, SGFNode, SGFGameTree, SGFParser
-from sgflib.exceptions import (
-    SGFPropertyValueParseError,
-    SGFPropertyParseError,
-    SGFNodeParseError,
-    SGFGameTreeParseError,
+from sgflib import (
+    SGFNode,
+    SGFSequence,
+    SGFGameTree,
+    SGFCollection,
+    SGFParser,
 )
+from sgflib.exceptions import SGFParserError
 
 
 @pytest.mark.parametrize(
@@ -31,49 +32,54 @@ def test_parse_prop_value(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("dd]", "Expected `[` at the start of SGFProperty value."),
-        (";B[dd]", "Expected `[` at the start of SGFProperty value."),
-        ("(;B[dd])", "Expected `[` at the start of SGFProperty value."),
-        ("[dd", "Expected `]` at the end of SGFProperty value."),
-        ("[John Doe [3d\\]", "Expected `]` at the end of SGFProperty value."),
+        ("dd]", "Expecting SGFProperty value: line 1 column 1 (char 0)"),
+        (";B[dd]", "Expecting SGFProperty value: line 1 column 1 (char 0)"),
+        ("(;B[dd])", "Expecting SGFProperty value: line 1 column 1 (char 0)"),
+        ("[dd", "Unterminated SGFProperty value: line 1 column 2 (char 1)"),
+        (
+            "[John Doe [3d\\]",
+            "Unterminated SGFProperty value: line 1 column 16 (char 15)",
+        ),
     ],
 )
 def test_parse_prop_value_error(data, expected):
     parser = SGFParser(data)
-    with pytest.raises(SGFPropertyValueParseError) as err:
+    with pytest.raises(SGFParserError) as err:
         parser.parse_prop_value()
     assert str(err.value) == expected
 
 
 @pytest.mark.parametrize(
-    "data, expected",
+    "data, label, values",
     [
-        ("AB[dd][pp]", SGFProperty("AB", ["dd", "pp"])),
-        ("AB[dd][pp]C", SGFProperty("AB", ["dd", "pp"])),
-        ("AB[dd][pp];", SGFProperty("AB", ["dd", "pp"])),
-        ("AB[dd][pp](", SGFProperty("AB", ["dd", "pp"])),
-        ("AB[dd][pp])", SGFProperty("AB", ["dd", "pp"])),
+        ("AB[dd][pp]", "AB", {"dd", "pp"}),
+        ("AB[dd][pp]C", "AB", {"dd", "pp"}),
+        ("AB[dd][pp];", "AB", {"dd", "pp"}),
+        ("AB[dd][pp](", "AB", {"dd", "pp"}),
+        ("AB[dd][pp])", "AB", {"dd", "pp"}),
     ],
 )
-def test_parse_prop(data, expected):
+def test_parse_prop(data, label, values):
     parser = SGFParser(data)
-    prop = parser.parse_prop()
-    assert prop == expected
+    prop = parser.parse_property()
+    assert prop.label == label
+    assert prop.values == values
 
 
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("[dd]", "Expected `[a-zA-Z]` at the start of SGFProperty."),
-        (";B[dd]", "Expected `[a-zA-Z]` at the start of SGFProperty."),
-        ("(;B[dd])", "Expected `[a-zA-Z]` at the start of SGFProperty."),
-        ("B[dd", "Expected at least one SGFProperty value."),
+        ("[dd]", "Expecting SGFProperty: line 1 column 1 (char 0)"),
+        (";B[dd]", "Expecting SGFProperty: line 1 column 1 (char 0)"),
+        ("(;B[dd])", "Expecting SGFProperty: line 1 column 1 (char 0)"),
+        ("B;", "Expecting SGFProperty value: line 1 column 2 (char 1)"),
+        ("B[dd", "Unterminated SGFProperty value: line 1 column 3 (char 2)"),
     ],
 )
 def test_parse_prop_error(data, expected):
     parser = SGFParser(data)
-    with pytest.raises(SGFPropertyParseError) as err:
-        parser.parse_prop()
+    with pytest.raises(SGFParserError) as err:
+        parser.parse_property()
     assert str(err.value) == expected
 
 
@@ -81,10 +87,10 @@ def test_parse_prop_error(data, expected):
     "data, expected",
     [
         (";", SGFNode([])),
-        (";B[dd]C[Go]", SGFNode([SGFProperty("B", ["dd"]), SGFProperty("C", ["Go"])])),
-        (";B[dd]C[Go];", SGFNode([SGFProperty("B", ["dd"]), SGFProperty("C", ["Go"])])),
-        (";B[dd]C[Go](", SGFNode([SGFProperty("B", ["dd"]), SGFProperty("C", ["Go"])])),
-        (";B[dd]C[Go])", SGFNode([SGFProperty("B", ["dd"]), SGFProperty("C", ["Go"])])),
+        (";B[dd]C[Go]", SGFNode({"B": ["dd"], "C": ["Go"]})),
+        (";B[dd]C[Go];", SGFNode({"B": ["dd"], "C": ["Go"]})),
+        (";B[dd]C[Go](", SGFNode({"B": ["dd"], "C": ["Go"]})),
+        (";B[dd]C[Go])", SGFNode({"B": ["dd"], "C": ["Go"]})),
     ],
 )
 def test_parse_node(data, expected):
@@ -96,14 +102,14 @@ def test_parse_node(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("[dd]", "Expected `;` at the start of SGFNode."),
-        ("B[dd]", "Expected `;` at the start of SGFNode."),
-        ("(;B[dd])", "Expected `;` at the start of SGFNode."),
+        ("[dd]", "Expecting SGFNode: line 1 column 1 (char 0)"),
+        ("B[dd]", "Expecting SGFNode: line 1 column 1 (char 0)"),
+        ("(;B[dd])", "Expecting SGFNode: line 1 column 1 (char 0)"),
     ],
 )
 def test_parse_node_error(data, expected):
     parser = SGFParser(data)
-    with pytest.raises(SGFNodeParseError) as err:
+    with pytest.raises(SGFParserError) as err:
         parser.parse_node()
     assert str(err.value) == expected
 
@@ -111,46 +117,176 @@ def test_parse_node_error(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("(;)", SGFGameTree([SGFNode()])),
-        ("(;B[dd])", SGFGameTree([SGFNode([SGFProperty("B", ["dd"])])])),
-        ("(;B[dd]);", SGFGameTree([SGFNode([SGFProperty("B", ["dd"])])])),
-        ("(;B[dd])(", SGFGameTree([SGFNode([SGFProperty("B", ["dd"])])])),
-        ("(;B[dd]))", SGFGameTree([SGFNode([SGFProperty("B", ["dd"])])])),
+        (";", SGFSequence([SGFNode([])])),
+        (";B[dd]", SGFSequence([SGFNode({"B": ["dd"]})])),
         (
-            "(;B[dd](;W[pd];B[dp])(;W[qd]))",
-            SGFGameTree(
-                nodes=[SGFNode([SGFProperty("B", ["dd"])])],
-                variations=[
-                    SGFGameTree(
-                        nodes=[
-                            SGFNode([SGFProperty("W", ["pd"])]),
-                            SGFNode([SGFProperty("B", ["dp"])]),
-                        ]
-                    ),
-                    SGFGameTree(nodes=[SGFNode([SGFProperty("W", ["qd"])])]),
-                ],
+            ";B[dd];W[pp]",
+            SGFSequence(
+                [
+                    SGFNode({"B": ["dd"]}),
+                    SGFNode({"W": ["pp"]}),
+                ]
+            ),
+        ),
+        (
+            ";B[dd];W[pp](",
+            SGFSequence(
+                [
+                    SGFNode({"B": ["dd"]}),
+                    SGFNode({"W": ["pp"]}),
+                ]
+            ),
+        ),
+        (
+            ";B[dd];W[pp])",
+            SGFSequence(
+                [
+                    SGFNode({"B": ["dd"]}),
+                    SGFNode({"W": ["pp"]}),
+                ]
             ),
         ),
     ],
 )
-def test_parse_tree(data, expected):
+def test_parse_sequence(data, expected):
     parser = SGFParser(data)
-    prop = parser.parse_tree()
-    assert prop == expected
+    sequence = parser.parse_sequence()
+    assert sequence == expected
 
 
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("[dd]", "Expected `(` at the start of SGFGameTree."),
-        ("B[dd]", "Expected `(` at the start of SGFGameTree."),
-        (";B[dd]", "Expected `(` at the start of SGFGameTree."),
-        ("(;B[dd]", "Expected `)` at the end of SGFGameTree."),
-        ("()", "Expected at least one SGFNode."),
+        ("[dd]", "Expecting SGFSequence: line 1 column 1 (char 0)"),
+        ("B[dd]", "Expecting SGFSequence: line 1 column 1 (char 0)"),
+        ("(;B[dd])", "Expecting SGFSequence: line 1 column 1 (char 0)"),
     ],
 )
-def test_parse_tree_error(data, expected):
+def test_parse_sequence_error(data, expected):
     parser = SGFParser(data)
-    with pytest.raises(SGFGameTreeParseError) as err:
-        parser.parse_tree()
+    with pytest.raises(SGFParserError) as err:
+        parser.parse_sequence()
+    assert str(err.value) == expected
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ("(;)", SGFGameTree([SGFNode()])),
+        ("(;B[dd])", SGFGameTree([SGFNode({"B": ["dd"]})])),
+        ("(;B[dd]);", SGFGameTree([SGFNode({"B": ["dd"]})])),
+        ("(;B[dd])(", SGFGameTree([SGFNode({"B": ["dd"]})])),
+        ("(;B[dd]))", SGFGameTree([SGFNode({"B": ["dd"]})])),
+        (
+            "(;B[dd](;W[pd];B[dp])(;W[qd]))",
+            SGFGameTree(
+                nodes=[SGFNode({"B": ["dd"]})],
+                variations=[
+                    SGFGameTree(
+                        nodes=[
+                            SGFNode({"W": ["pd"]}),
+                            SGFNode({"B": ["dp"]}),
+                        ]
+                    ),
+                    SGFGameTree(nodes=[SGFNode({"W": ["qd"]})]),
+                ],
+            ),
+        ),
+    ],
+)
+def test_parse_game_tree(data, expected):
+    parser = SGFParser(data)
+    assert parser.parse_game_tree() == expected
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ("[dd]", "Expecting SGFGameTree: line 1 column 1 (char 0)"),
+        ("B[dd]", "Expecting SGFGameTree: line 1 column 1 (char 0)"),
+        (";B[dd]", "Expecting SGFGameTree: line 1 column 1 (char 0)"),
+        ("()", "Expecting SGFSequence: line 1 column 2 (char 1)"),
+        ("(;B[dd]", "Unterminated SGFGameTree: line 1 column 8 (char 7)"),
+    ],
+)
+def test_parse_game_tree_error(data, expected):
+    parser = SGFParser(data)
+    with pytest.raises(SGFParserError) as err:
+        parser.parse_game_tree()
+    assert str(err.value) == expected
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ("(;)", [SGFGameTree([SGFNode()])]),
+        (
+            "(;B[dd])(;B[dc])",
+            [
+                SGFGameTree([SGFNode({"B": ["dd"]})]),
+                SGFGameTree([SGFNode({"B": ["dc"]})]),
+            ],
+        ),
+        (
+            "(;B[dd])(;B[dc]))",
+            [
+                SGFGameTree([SGFNode({"B": ["dd"]})]),
+                SGFGameTree([SGFNode({"B": ["dc"]})]),
+            ],
+        ),
+    ],
+)
+def test_parse_game_trees(data, expected):
+    parser = SGFParser(data)
+    assert parser.parse_game_trees() == expected
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ("(;) ", SGFCollection([SGFGameTree([SGFNode()])])),
+        (
+            "(;B[dd])(;B[dc])",
+            SGFCollection(
+                [
+                    SGFGameTree([SGFNode({"B": ["dd"]})]),
+                    SGFGameTree([SGFNode({"B": ["dc"]})]),
+                ]
+            ),
+        ),
+        (
+            "(;B[dd](;W[pp])(;W[pq]))(;B[dc])",
+            SGFCollection(
+                [
+                    SGFGameTree(
+                        nodes=[SGFNode({"B": ["dd"]})],
+                        variations=[
+                            SGFGameTree([SGFNode({"W": ["pp"]})]),
+                            SGFGameTree([SGFNode({"W": ["pq"]})]),
+                        ],
+                    ),
+                    SGFGameTree([SGFNode({"B": ["dc"]})]),
+                ]
+            ),
+        ),
+    ],
+)
+def test_parse_collection(data, expected):
+    parser = SGFParser(data)
+    assert parser.parse_collection() == expected
+
+
+@pytest.mark.parametrize(
+    "data, expected",
+    [
+        ("[dd]", "Expecting SGFCollection: line 1 column 1 (char 0)"),
+        ("B[dd]", "Expecting SGFCollection: line 1 column 1 (char 0)"),
+        (";B[dd]", "Expecting SGFCollection: line 1 column 1 (char 0)"),
+        ("(;B[dd]))", "Extra data: line 1 column 9 (char 8)"),
+    ],
+)
+def test_parse_collection_error(data, expected):
+    parser = SGFParser(data)
+    with pytest.raises(SGFParserError) as err:
+        parser.parse_collection()
     assert str(err.value) == expected
