@@ -180,15 +180,15 @@ def test_parse_sequence_error(data, expected):
         (
             "(;B[dd](;W[pd];B[dp])(;W[qd]))",
             SGFGameTree(
-                nodes=[SGFNode({"B": ["dd"]})],
+                sequence=[SGFNode({"B": ["dd"]})],
                 variations=[
                     SGFGameTree(
-                        nodes=[
+                        sequence=[
                             SGFNode({"W": ["pd"]}),
                             SGFNode({"B": ["dp"]}),
                         ]
                     ),
-                    SGFGameTree(nodes=[SGFNode({"W": ["qd"]})]),
+                    SGFGameTree(sequence=[SGFNode({"W": ["qd"]})]),
                 ],
             ),
         ),
@@ -259,7 +259,7 @@ def test_parse_game_trees(data, expected):
             SGFCollection(
                 [
                     SGFGameTree(
-                        nodes=[SGFNode({"B": ["dd"]})],
+                        sequence=[SGFNode({"B": ["dd"]})],
                         variations=[
                             SGFGameTree([SGFNode({"W": ["pp"]})]),
                             SGFGameTree([SGFNode({"W": ["pq"]})]),

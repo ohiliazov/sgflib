@@ -1,6 +1,5 @@
-from typing import List, Union
+from typing import List, Dict, Iterable
 
-from .node import SGFNode
 from .sequence import SGFSequence
 from .exceptions import SGFGameTreeError
 
@@ -8,17 +7,17 @@ from .exceptions import SGFGameTreeError
 class SGFGameTree:
     def __init__(
         self,
-        nodes: Union[SGFSequence, List[SGFNode]],
+        sequence: List[Dict[str, Iterable[str]]],
         variations: List["SGFGameTree"] = None,
     ):
-        self.sequence = SGFSequence(nodes)
+        self.sequence = SGFSequence(sequence)
         self.variations = variations or []
 
     def __str__(self):
         return "(" + str(self.sequence) + "".join(map(str, self.variations)) + ")"
 
     def __repr__(self):
-        return f"SGFGameTree({str(self)})"
+        return f"SGFGameTree({self})"
 
     def __eq__(self, other: "SGFGameTree"):
         return self.sequence == other.sequence and self.variations == other.variations

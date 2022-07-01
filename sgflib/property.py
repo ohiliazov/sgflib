@@ -13,11 +13,7 @@ class SGFProperty:
         return self.label + "[" + "][".join(map(escape_text, sorted(self.values))) + "]"
 
     def __repr__(self):
-        return f"SGFProperty({str(self)})"
-
-    #
-    # def __eq__(self, other: "SGFProperty"):
-    #     return self.label == other.label
+        return f"SGFProperty({self})"
 
     def add(self, value: str):
         self.values.add(value)

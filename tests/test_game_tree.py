@@ -49,9 +49,9 @@ def test_tree_ops():
     with pytest.raises(SGFSequenceError):
         _ = SGFGameTree([])
 
-    tree = SGFGameTree(nodes=[SGFNode({"C": ["Root tree."]})])
+    tree = SGFGameTree([{"C": ["Root tree."]}])
 
-    moves = SGFGameTree(nodes=[SGFNode({"B": ["dd"]}), SGFNode({"W": ["pp"]})])
+    moves = SGFGameTree(sequence=[SGFNode({"B": ["dd"]}), SGFNode({"W": ["pp"]})])
 
     with pytest.raises(SGFGameTreeError):
         tree.insert(moves, 0)
@@ -62,40 +62,40 @@ def test_tree_ops():
     tree.insert(moves, 1)
 
     assert tree == SGFGameTree(
-        nodes=[
+        sequence=[
             SGFNode({"C": ["Root tree."]}),
             SGFNode({"B": ["dd"]}),
             SGFNode({"W": ["pp"]}),
         ]
     )
 
-    white_move_2 = SGFGameTree(nodes=[SGFNode({"W": ["pq"]})])
+    white_move_2 = SGFGameTree(sequence=[SGFNode({"W": ["pq"]})])
 
     tree.insert(white_move_2, 2)
 
     assert tree == SGFGameTree(
-        nodes=[
+        sequence=[
             SGFNode({"C": ["Root tree."]}),
             SGFNode({"B": ["dd"]}),
         ],
         variations=[
-            SGFGameTree(nodes=[SGFNode({"W": ["pp"]})]),
-            SGFGameTree(nodes=[SGFNode({"W": ["pq"]})]),
+            SGFGameTree(sequence=[SGFNode({"W": ["pp"]})]),
+            SGFGameTree(sequence=[SGFNode({"W": ["pq"]})]),
         ],
     )
 
-    white_move_3 = SGFGameTree(nodes=[SGFNode({"W": ["qq"]})])
+    white_move_3 = SGFGameTree(sequence=[SGFNode({"W": ["qq"]})])
 
     tree.insert(white_move_3, 2)
 
     assert tree == SGFGameTree(
-        nodes=[
+        sequence=[
             SGFNode({"C": ["Root tree."]}),
             SGFNode({"B": ["dd"]}),
         ],
         variations=[
-            SGFGameTree(nodes=[SGFNode({"W": ["pp"]})]),
-            SGFGameTree(nodes=[SGFNode({"W": ["pq"]})]),
-            SGFGameTree(nodes=[SGFNode({"W": ["qq"]})]),
+            SGFGameTree(sequence=[SGFNode({"W": ["pp"]})]),
+            SGFGameTree(sequence=[SGFNode({"W": ["pq"]})]),
+            SGFGameTree(sequence=[SGFNode({"W": ["qq"]})]),
         ],
     )

@@ -43,5 +43,12 @@ def test_node_ops():
 
     del node["AW"]
     assert node == {"AB": {"dd"}}
+
     with pytest.raises(KeyError):
         del node["AW"]
+
+    node.update({"AW": ["pp"]})
+    assert node == {"AB": {"dd"}, "AW": {"pp"}}
+
+    node.setdefault("B", ["qq"])
+    assert node == {"AB": {"dd"}, "AW": {"pp"}, "B": {"qq"}}

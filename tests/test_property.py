@@ -26,10 +26,8 @@ def test_property_ops():
     with pytest.raises(SGFPropertyValueError) as err:
         prop.remove("dd")
 
-    assert str(err.value) == "Cannot remove last element of SGFPropertyValue"
+    assert str(err.value) == "Cannot remove last element"
 
     prop.add("pp")
-    with pytest.raises(SGFPropertyValueError) as err:
+    with pytest.raises(KeyError) as err:
         prop.remove("dq")
-
-    assert str(err.value) == "Element not found in SGFPropertyValue"

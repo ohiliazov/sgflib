@@ -1,3 +1,4 @@
+from .property_value import SGFPropertyValue
 from .property import SGFProperty
 from .node import SGFNode
 from .sequence import SGFSequence

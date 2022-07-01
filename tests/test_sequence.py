@@ -1,22 +1,17 @@
 import pytest
 
-from sgflib import SGFSequence, SGFNode
+from sgflib import SGFSequence
 
 
 @pytest.mark.parametrize(
     "nodes, expected",
     [
-        ([SGFNode()], ";"),
-        ([SGFNode({"B": {"dd"}}), SGFNode({"W": ["pp"]})], ";B[dd];W[pp]"),
+        ([{}], ";"),
+        ([{"B": {"dd"}}, {"W": ["pp"]}], ";B[dd];W[pp]"),
         (
             [
-                SGFNode(
-                    {
-                        "B": {"dd"},
-                        "C": ["John Doe [3d] \\UA\\"],
-                    }
-                ),
-                SGFNode({"W": ["pp"]}),
+                {"B": {"dd"}, "C": ["John Doe [3d] \\UA\\"]},
+                {"W": ["pp"]},
             ],
             ";B[dd]C[John Doe [3d\\] \\\\UA\\\\];W[pp]",
         ),
