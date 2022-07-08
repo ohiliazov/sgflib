@@ -59,11 +59,11 @@ def test_parse_prop_value_error(data, expected):
         ("AB[dd][pp])", "AB", {"dd", "pp"}),
     ],
 )
-def test_parse_prop(data, label, values):
+def test_parse_property(data, label, values):
     parser = SGFParser(data)
-    prop = parser.parse_property()
-    assert prop.label == label
-    assert prop.values == values
+    prop_label, prop_value = parser.parse_property()
+    assert prop_label == label
+    assert prop_value == values
 
 
 @pytest.mark.parametrize(
@@ -95,8 +95,8 @@ def test_parse_prop_error(data, expected):
 )
 def test_parse_node(data, expected):
     parser = SGFParser(data)
-    prop = parser.parse_node()
-    assert prop == expected
+    node = parser.parse_node()
+    assert node == expected
 
 
 @pytest.mark.parametrize(

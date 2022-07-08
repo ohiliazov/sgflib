@@ -1,10 +1,10 @@
 import re
-from typing import Pattern, Match, List
+from typing import Pattern, Match, List, Tuple
 
 from .exceptions import SGFParserError
 from .utils import convert_control_chars
 from .collection import SGFCollection
-from .property import SGFProperty
+from .property_value import SGFPropertyValue
 from .node import SGFNode
 from .sequence import SGFSequence
 from .game_tree import SGFGameTree
@@ -120,16 +120,17 @@ class SGFParser:
         self.index = match.end()
 
         # parse SGFProperties till ";", "(" or ")"
-        props = []
+        props = {}
         try:
             while True:
-                props.append(self.parse_property())
+                prop_label, prop_values = self.parse_property()
+                props[prop_label] = prop_values
         except SGFParserError:
             pass
 
-        return SGFNode.from_properties(props)
+        return SGFNode(props)
 
-    def parse_property(self) -> SGFProperty:
+    def parse_property(self) -> Tuple[str, SGFPropertyValue]:
         """
         Parses single SGFProperty.
 
@@ -144,16 +145,16 @@ class SGFParser:
         # consume SGFProperty label
         self.index = match.end()
 
-        prop_values = []
+        prop_label = match.group(0)
+        values = []
         try:
             while True:
-                prop_values.append(self.parse_prop_value())
+                values.append(self.parse_prop_value())
         except SGFParserError as err:
-            if not prop_values:
+            if not values:
                 raise err
 
-        prop = SGFProperty(match.group(0), prop_values)
-        return prop
+        return prop_label, SGFPropertyValue(values)
 
     def parse_prop_value(self) -> str:
         """

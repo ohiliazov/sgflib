@@ -19,7 +19,7 @@ from sgflib import SGFNode
 )
 def test_print_node(props, expected):
     node = SGFNode(props)
-    assert str(node) == expected
+    assert node.sgf == expected
     assert repr(node) == f"SGFNode({expected})"
 
 

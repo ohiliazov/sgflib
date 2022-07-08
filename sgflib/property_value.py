@@ -10,11 +10,12 @@ class SGFPropertyValue(Set[str]):
             raise SGFPropertyValueError("Cannot be empty")
         super().__init__(data)
 
-    def __str__(self):
+    @property
+    def sgf(self) -> str:
         return "[" + "][".join(sorted(map(escape_text, self))) + "]"
 
     def __repr__(self):
-        return f"SGFPropertyValue({self})"
+        return f"SGFPropertyValue({self.sgf})"
 
     def clear(self):
         raise SGFPropertyValueError("Cannot clear")

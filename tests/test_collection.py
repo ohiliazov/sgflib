@@ -41,6 +41,6 @@ from sgflib import SGFCollection, SGFGameTree
 )
 def test_print_collection(trees, expected, expected_pretty):
     collection = SGFCollection(trees)
-    assert str(collection) == expected
+    assert collection.sgf == expected
     assert repr(collection) == f"SGFCollection({expected})"
     assert collection.pretty() == expected_pretty

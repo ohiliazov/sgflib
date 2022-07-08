@@ -13,17 +13,23 @@ class SGFGameTree:
         self.sequence = SGFSequence(sequence)
         self.variations = variations or []
 
-    def __str__(self):
-        return "(" + str(self.sequence) + "".join(map(str, self.variations)) + ")"
+    @property
+    def sgf(self):
+        return (
+            "("
+            + self.sequence.sgf
+            + "".join(tree.sgf for tree in self.variations)
+            + ")"
+        )
 
     def __repr__(self):
-        return f"SGFGameTree({self})"
+        return f"SGFGameTree({self.sgf})"
 
     def __eq__(self, other: "SGFGameTree"):
         return self.sequence == other.sequence and self.variations == other.variations
 
     def pretty(self, offset: int = 0, indent: int = 2):
-        s = " " * offset + "(\n" + " " * (offset + indent) + str(self.sequence)
+        s = " " * offset + "(\n" + " " * (offset + indent) + self.sequence.sgf
         for tree in self.variations:
             s += "\n" + " " * offset + tree.pretty(offset + indent, indent)
         return s + "\n" + " " * offset + ")"

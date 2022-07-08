@@ -14,10 +14,10 @@ from sgflib.exceptions import SGFPropertyValueError
         (["John Doe [3d] \\UA\\"], "[John Doe [3d\\] \\\\UA\\\\]"),
     ],
 )
-def test_print_property(values, expected):
-    prop = SGFPropertyValue(values)
-    assert str(prop) == expected
-    assert repr(prop) == f"SGFPropertyValue({expected})"
+def test_print_property_value(values, expected):
+    prop_value = SGFPropertyValue(values)
+    assert prop_value.sgf == expected
+    assert repr(prop_value) == f"SGFPropertyValue({expected})"
 
 
 def test_property_value_ops():

@@ -19,5 +19,5 @@ from sgflib import SGFSequence
 )
 def test_print_sequence(nodes, expected):
     sequence = SGFSequence(nodes)
-    assert str(sequence) == expected
+    assert sequence.sgf == expected
     assert repr(sequence) == f"SGFSequence({expected})"

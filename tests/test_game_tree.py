@@ -40,7 +40,7 @@ from sgflib.exceptions import SGFGameTreeError, SGFSequenceError
 )
 def test_print_tree(nodes, variations, expected, expected_pretty):
     tree = SGFGameTree(nodes, variations)
-    assert str(tree) == expected
+    assert tree.sgf == expected
     assert repr(tree) == f"SGFGameTree({expected})"
     assert tree.pretty() == expected_pretty
 

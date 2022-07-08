@@ -4,14 +4,15 @@ from .exceptions import SGFSequenceError
 from .node import SGFNode
 
 
-class SGFSequence(List[Dict[str, Iterable[str]]]):
+class SGFSequence(List[SGFNode]):
     def __init__(self, sequence: List[Dict[str, Iterable[str]]]):
         if not sequence:
             raise SGFSequenceError("Expected at least one SGFNode in SGFSequence.")
         super().__init__(map(SGFNode, sequence))
 
-    def __str__(self):
-        return "".join(map(str, self))
+    @property
+    def sgf(self) -> str:
+        return "".join(node.sgf for node in self)
 
     def __repr__(self):
-        return f"SGFSequence({str(self)})"
+        return f"SGFSequence({self.sgf})"
