@@ -1,6 +1,6 @@
 import pytest
 
-from sgflib import SGFParser, SGFCursor
+from sgflib import SGFParser, SGFCursor, SGFGameTree
 from sgflib.exceptions import SGFCursorError
 
 TEST_SGF = """
@@ -71,3 +71,8 @@ def test_cursor():
         cursor.next()
 
     assert str(err.value) == "Reached end of SGFGameTree."
+
+    cursor.insert(SGFGameTree([{"W": {"de"}}], []))
+    cursor.next()
+
+    assert cursor.node.sgf == ";W[de]"

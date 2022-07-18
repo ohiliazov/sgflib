@@ -6,3 +6,4 @@ from .collection import SGFCollection
 from .parser import SGFParser
 from .cursor import SGFCursor
 from .board import SGFBoard
+from .kifu import SGFKifu

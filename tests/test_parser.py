@@ -86,7 +86,7 @@ def test_parse_prop_error(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        (";", SGFNode([])),
+        (";", SGFNode({})),
         (";B[dd]C[Go]", SGFNode({"B": ["dd"], "C": ["Go"]})),
         (";B[dd]C[Go];", SGFNode({"B": ["dd"], "C": ["Go"]})),
         (";B[dd]C[Go](", SGFNode({"B": ["dd"], "C": ["Go"]})),
@@ -172,11 +172,11 @@ def test_parse_sequence_error(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("(;)", SGFGameTree([SGFNode()])),
-        ("(;B[dd])", SGFGameTree([SGFNode({"B": ["dd"]})])),
-        ("(;B[dd]);", SGFGameTree([SGFNode({"B": ["dd"]})])),
-        ("(;B[dd])(", SGFGameTree([SGFNode({"B": ["dd"]})])),
-        ("(;B[dd]))", SGFGameTree([SGFNode({"B": ["dd"]})])),
+        ("(;)", SGFGameTree([{}], [])),
+        ("(;B[dd])", SGFGameTree([SGFNode({"B": ["dd"]})], [])),
+        ("(;B[dd]);", SGFGameTree([SGFNode({"B": ["dd"]})], [])),
+        ("(;B[dd])(", SGFGameTree([SGFNode({"B": ["dd"]})], [])),
+        ("(;B[dd]))", SGFGameTree([SGFNode({"B": ["dd"]})], [])),
         (
             "(;B[dd](;W[pd];B[dp])(;W[qd]))",
             SGFGameTree(
@@ -186,9 +186,10 @@ def test_parse_sequence_error(data, expected):
                         sequence=[
                             SGFNode({"W": ["pd"]}),
                             SGFNode({"B": ["dp"]}),
-                        ]
+                        ],
+                        variations=[],
                     ),
-                    SGFGameTree(sequence=[SGFNode({"W": ["qd"]})]),
+                    SGFGameTree(sequence=[SGFNode({"W": ["qd"]})], variations=[]),
                 ],
             ),
         ),
@@ -219,19 +220,19 @@ def test_parse_game_tree_error(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("(;)", [SGFGameTree([SGFNode()])]),
+        ("(;)", [SGFGameTree([SGFNode()], [])]),
         (
             "(;B[dd])(;B[dc])",
             [
-                SGFGameTree([SGFNode({"B": ["dd"]})]),
-                SGFGameTree([SGFNode({"B": ["dc"]})]),
+                SGFGameTree([SGFNode({"B": ["dd"]})], []),
+                SGFGameTree([SGFNode({"B": ["dc"]})], []),
             ],
         ),
         (
             "(;B[dd])(;B[dc]))",
             [
-                SGFGameTree([SGFNode({"B": ["dd"]})]),
-                SGFGameTree([SGFNode({"B": ["dc"]})]),
+                SGFGameTree([SGFNode({"B": ["dd"]})], []),
+                SGFGameTree([SGFNode({"B": ["dc"]})], []),
             ],
         ),
     ],
@@ -244,13 +245,13 @@ def test_parse_game_trees(data, expected):
 @pytest.mark.parametrize(
     "data, expected",
     [
-        ("(;) ", SGFCollection([SGFGameTree([SGFNode()])])),
+        ("(;) ", SGFCollection([SGFGameTree([SGFNode()], [])])),
         (
             "(;B[dd])(;B[dc])",
             SGFCollection(
                 [
-                    SGFGameTree([SGFNode({"B": ["dd"]})]),
-                    SGFGameTree([SGFNode({"B": ["dc"]})]),
+                    SGFGameTree([SGFNode({"B": ["dd"]})], []),
+                    SGFGameTree([SGFNode({"B": ["dc"]})], []),
                 ]
             ),
         ),
@@ -261,11 +262,11 @@ def test_parse_game_trees(data, expected):
                     SGFGameTree(
                         sequence=[SGFNode({"B": ["dd"]})],
                         variations=[
-                            SGFGameTree([SGFNode({"W": ["pp"]})]),
-                            SGFGameTree([SGFNode({"W": ["pq"]})]),
+                            SGFGameTree([SGFNode({"W": ["pp"]})], []),
+                            SGFGameTree([SGFNode({"W": ["pq"]})], []),
                         ],
                     ),
-                    SGFGameTree([SGFNode({"B": ["dc"]})]),
+                    SGFGameTree([SGFNode({"B": ["dc"]})], []),
                 ]
             ),
         ),

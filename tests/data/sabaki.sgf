@@ -1,0 +1,9 @@
+(
+  ;AB[qb][qc][qd][re][sd]AP[Sabaki:0.52.0]AW[nb][pb][pc][pd][pe][qe][qg][rf]CA[UTF-8]DT[2022-07-14]FF[4]GM[1]GW[1]KM[6.5]N[White to play]PL[W]SZ[19];W[sb];B[rb]
+  (
+    ;N[Tesuji]SQ[sf]W[sf];B[sc];W[rd];B[rc];W[se];B[sa];C[Black is dead.]N[OK]TR[qb][qc][qd][rb][rc][re][sa][sc][sd]W[qa]
+  )
+  (
+    ;W[rd];B[rc];W[sf];B[se]C[Black is alive.]N[FAIL]
+  )
+)

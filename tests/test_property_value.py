@@ -20,6 +20,17 @@ def test_print_property_value(values, expected):
     assert repr(prop_value) == f"SGFPropertyValue({expected})"
 
 
+def test_copy_property_value():
+    prop_value = SGFPropertyValue({"aa", "bb"})
+    copy_prop_value = prop_value.copy()
+
+    assert copy_prop_value == prop_value
+
+    copy_prop_value.add("cc")
+    assert prop_value == {"aa", "bb"}
+    assert copy_prop_value == {"aa", "bb", "cc"}
+
+
 def test_property_value_ops():
     with pytest.raises(SGFPropertyValueError) as err:
         _ = SGFPropertyValue([])

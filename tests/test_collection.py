@@ -1,19 +1,19 @@
 import pytest
 
-from sgflib import SGFCollection, SGFGameTree
+from sgflib import SGFCollection
 
 
 @pytest.mark.parametrize(
     "trees, expected, expected_pretty",
     [
-        ([SGFGameTree([{}])], "(;)", "(\n  ;\n)"),
+        ([([{}], [])], "(;)", "(\n  ;\n)"),
         (
             [
-                SGFGameTree(
+                (
                     [
                         {"AB": ["dd", "pp"]},
                         {"W": ["pd"]},
-                    ]
+                    ],
                 )
             ],
             "(;AB[dd][pp];W[pd])",
@@ -21,17 +21,17 @@ from sgflib import SGFCollection, SGFGameTree
         ),
         (
             [
-                SGFGameTree(
+                (
                     [
                         {"AB": ["dd", "pp"]},
                         {"W": ["pd"]},
-                    ]
+                    ],
                 ),
-                SGFGameTree(
+                (
                     [
                         {"AW": ["dd", "pp"]},
                         {"B": ["pd"]},
-                    ]
+                    ],
                 ),
             ],
             "(;AB[dd][pp];W[pd])\n\n(;AW[dd][pp];B[pd])",

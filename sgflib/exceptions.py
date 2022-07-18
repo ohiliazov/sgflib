@@ -30,3 +30,11 @@ class SGFCursorError(Exception):
 
 class SGFBoardError(Exception):
     pass
+
+
+class SGFCoordinateError(Exception):
+    pass
+
+
+class SGFPointError(Exception):
+    pass

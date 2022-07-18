@@ -1,11 +1,14 @@
-from typing import Set, Iterable
+from typing import TYPE_CHECKING, Set
 
 from .exceptions import SGFPropertyValueError
 from .utils import escape_text
 
+if TYPE_CHECKING:
+    from .types import SGFPropertyValueType
+
 
 class SGFPropertyValue(Set[str]):
-    def __init__(self, data: Iterable[str]):
+    def __init__(self, data: "SGFPropertyValueType"):
         if not data:
             raise SGFPropertyValueError("Cannot be empty")
         super().__init__(data)
@@ -16,6 +19,9 @@ class SGFPropertyValue(Set[str]):
 
     def __repr__(self):
         return f"SGFPropertyValue({self.sgf})"
+
+    def copy(self) -> "SGFPropertyValue":
+        return SGFPropertyValue(self)
 
     def clear(self):
         raise SGFPropertyValueError("Cannot clear")
